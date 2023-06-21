@@ -55,7 +55,8 @@ contract ERC721{
         return owner != address(0); 
     }
 
-    function _mint(address to, uint256 tokenId) internal {
+    // 오버라이드를 한 경우 상속해준 함수임을 표현해야함
+    function _mint(address to, uint256 tokenId) internal virtual {
         // 민팅 요청자의 주소가 0이 아니어야함
         require(to != address(0), 'ERC721: minting to the zero address');
         // 토큰ID가 민팅요청자에게 없어야 함
