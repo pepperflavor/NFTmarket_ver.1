@@ -16,6 +16,7 @@ contract ERC721Enumerable is ERC721 {
     mapping(uint256 => uint256) private _allTokensIndex;
 
     // 지갑에 속한 모든 tokenid 들을 목록에 매핑- 토큰을 몇개 가졌는지 알아낼 수 있다.
+    // 지갑주소 - 토큰ID들이 담긴 배열 - 배열의 길이== 소유한 NFT갯수
     mapping (address => uint256[]) private _ownedTokens;
 
     // 토큰소유자의 목록(배열)에서 토큰의 인덱스 매핑
@@ -23,30 +24,47 @@ contract ERC721Enumerable is ERC721 {
     // 토큰ID를 가져와서 인덱스 값을 확인
     mapping(uint256 => uint256) private _ownedTokensIndex;
 
-
-    function tokenByIndex(uint256 _index) external view returns (uint256){
-
-    }
-
-
-    function tokenOfOwnerByIndex(address _owner, uint256 _index) external view returns (uint256){
-
-    }
-
     // ERC721에 있는 _mint 오버라이드
     function _mint(address to, uint256 tokenId) internal override(ERC721){
         super._mint(to, tokenId);
 
         // 1. 기본적으로 민팅할때 소유자에게 토큰추가
         // 2. totalSupply에 토큰 추가 - allTokens에
-        _addTokensToToatalSupply(tokenId);
+        _addTokensToAllTokenEnumeration(tokenId);
+        _addTokensToOwnerEnumeration(to, tokenId);
     }
 
-    function _addTokensToToatalSupply(uint256 tokenId) private {
+    // 총 곱급량에 토큰추가, 모든 토큰을 토큰 이뉴머레이션에 추가
+    // _allTokens 배열에 토큰을 추가하고 토큰 인덱스의 위치를 설정
+    function _addTokensToAllTokenEnumeration(uint256 tokenId) private {
+        _allTokensIndex[tokenId] = _allTokens.length;
         _allTokens.push(tokenId);
     }
 
+    function _addTokensToOwnerEnumeration(address to, uint256 tokenId) private {
+        // 1. _ownedTokens에 주소와 토큰ID 추가하기
+        // 2. _ownedTokensIndex에 tokenId를 위치 주소로 설정하고 
+        // 3. 민팅함수와 함께 실행
+        _ownedTokensIndex[tokenId] = _ownedTokens[to].length;
+        _ownedTokens[to].push(tokenId);
+    }
+
+    // tokenByIndex를 반환하는 함수, tokenByOwnerIndex를 반환하는 함수
+    // 인덱스를 통해 검색해서 토큰ID를 반환받을 함수
+    function tokenByIndex(uint256 index) public view returns(uint256){
+        // 총 공급량< 인덱스 가 되지않도록 조건 설정
+        require(index < totalSupply(), 'global index is not of bounds!');
+        return _allTokens[index];
+    }
+
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256){
+       // 지갑에 속한 nft 개수 > 인덱스 가 되지 않도록 조건 설정
+       require(index < balanceOf(owner), 'owner index is not of bounds!');
+       return _ownedTokens[owner][index];
+    }
+
     // public으로 설정했기 때문에 private로 설정해놓은 _allTokens로 한 연산값이 보임
+    // _allTokens 배열의 길이 == 총 공급량을 반환
     function totalSupply() public view returns(uint256){
         return _allTokens.length;
     }
