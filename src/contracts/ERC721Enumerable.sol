@@ -2,11 +2,12 @@
 pragma solidity ^0.8.0;
 
 import './ERC721.sol';
+import './interfaces/IERC721Enumerable.sol';
 
 
 // enumerable - enum을 의미하는게 아닌 수학적인 열거를 의미한다. 
 // 즉 이뉴머레이팅은 '한 집합 내 모든 항목이 완전히 순서가 매겨진 것'
-contract ERC721Enumerable is ERC721 {
+contract ERC721Enumerable is IERC721Enumerable, ERC721 {
 
     uint256[] private _allTokens;
 
@@ -23,6 +24,12 @@ contract ERC721Enumerable is ERC721 {
     // 토큰ID에서 소유자 토큰목록의 인덱스로 매핑
     // 토큰ID를 가져와서 인덱스 값을 확인
     mapping(uint256 => uint256) private _ownedTokensIndex;
+
+        constructor(){
+        _registerInterface(bytes4(keccak256('totalSupply(bytes4)')^
+                                    keccak256('tokenByIndex(bytes4)')^
+                                    keccak256('tokenOfOwnerByIndex(bytes4)')));
+    }
 
     // ERC721에 있는 _mint 오버라이드
     function _mint(address to, uint256 tokenId) internal override(ERC721){
@@ -51,13 +58,13 @@ contract ERC721Enumerable is ERC721 {
 
     // tokenByIndex를 반환하는 함수, tokenByOwnerIndex를 반환하는 함수
     // 인덱스를 통해 검색해서 토큰ID를 반환받을 함수
-    function tokenByIndex(uint256 index) public view returns(uint256){
+    function tokenByIndex(uint256 index) public override view returns(uint256){
         // 총 공급량< 인덱스 가 되지않도록 조건 설정
         require(index < totalSupply(), 'global index is not of bounds!');
         return _allTokens[index];
     }
 
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256){
+    function tokenOfOwnerByIndex(address owner, uint256 index) public override view returns (uint256){
        // 지갑에 속한 nft 개수 > 인덱스 가 되지 않도록 조건 설정
        require(index < balanceOf(owner), 'owner index is not of bounds!');
        return _ownedTokens[owner][index];
@@ -65,7 +72,7 @@ contract ERC721Enumerable is ERC721 {
 
     // public으로 설정했기 때문에 private로 설정해놓은 _allTokens로 한 연산값이 보임
     // _allTokens 배열의 길이 == 총 공급량을 반환
-    function totalSupply() public view returns(uint256){
+    function totalSupply() public override view returns(uint256){
         return _allTokens.length;
     }
 
