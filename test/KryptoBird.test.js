@@ -40,7 +40,7 @@ contract("KryptoBird", (accounts) => {
 
   describe("minting! ", async () => {
     it("create a new token", async () => {
-      const result = await contract.mint("http...1");
+      const result = await contract.mint("https...1");
       const totalSupply = await contract.totalSupply();
       // 성공시
       assert.equal(totalSupply, 1);
@@ -56,8 +56,33 @@ contract("KryptoBird", (accounts) => {
       assert.equal(event._to, accounts[0], "to is msg.sender");
 
       // 실패하는 경우
-      // should : 해야만한다.
-      //await contract.mint("https...1").should.be.rejected;
+      // should : 해야만한다. should.be.rejected는 실패를 예상하고 사용해야함
+      // await contract.mint("https...1").should.be.rejected;
+    });
+  });
+
+  describe("indexing", async () => {
+    it("lists KryptoBirdz", async () => {
+      // 토큰 추가 민팅
+      await contract.mint("https...2");
+      await contract.mint("https...3");
+      await contract.mint("https...4");
+      const totalSupply = await contract.totalSupply();
+      // 민팅한 nft의 Id들을 배열에 입력
+      let result = [];
+      let KryptoBird;
+
+      for (let i = 1; i <= totalSupply; i++) {
+        // KryptoBird = await contract.mint(`https...${i}`);
+        // 위에 처럼 직접 집어넣는걸 생각했는데 KryptoBird contract에 만들어둔
+        // 배열에 있는 값을 가져오는 방법이 맞다....
+        KryptoBird = await contract.kryptoBirdz(i - 1);
+        result.push(KryptoBird);
+      }
+
+      // 민팅한 토큰 검증
+      let expected = ["https...1", "https...2", "https...3", "https...4"];
+      assert.equal(result.join(","), expected.join(","));
     });
   });
 });
