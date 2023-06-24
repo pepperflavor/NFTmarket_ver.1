@@ -2,7 +2,17 @@ import React, { Component } from "react";
 import Web3 from "web3";
 import detectEthereumProvider from "@metamask/detect-provider";
 import KryptoBird from "../abis/KryptoBird.json";
+import {
+  MDBCard,
+  MDBCardBody,
+  MDBCardTitle,
+  MDBCardText,
+  MDBCardImage,
+  MDBBtn,
+} from "mdb-react-ui-kit";
+import "./App.css";
 
+/* cssgradient.io */
 class App extends Component {
   async componentDidMount() {
     await this.loadWeb3();
@@ -53,7 +63,6 @@ class App extends Component {
       // NFT 총 공급량
       const totalSupply = await contract.methods.totalSupply().call();
       this.setState({ totalSupply: totalSupply });
-      console.log(totalSupply);
 
       // 토큰 추적을 위한 배열
       for (let i = 1; i <= totalSupply; i++) {
@@ -76,8 +85,8 @@ class App extends Component {
 
   // 민팅기능 함수
   // .once()로 한번만 기능하도록 설정
-  // 주소가 지정되지 않았다고 오류뜸ㅠㅠ
-  async mint(kryptoBird) {
+  // 주소가 지정되지 않았다고 오류뜸ㅠㅠ =>  지갑주소 불러오는 방식을 바꿨다
+  mint = (kryptoBird) => {
     this.state.contract.methods
       .mint(kryptoBird)
       .send({ from: this.state.account })
@@ -86,7 +95,7 @@ class App extends Component {
           kryptoBirdz: [...this.state.kryptoBirdz, KryptoBird],
         });
       });
-  }
+  };
 
   //   async getMetaMarskAccount() {
   //     const accounts = await window.ethereum
@@ -116,8 +125,7 @@ class App extends Component {
 
   render() {
     return (
-      <div>
-        {console.log("@@ : " + this.state.kryptoBirdz)}
+      <div className="container-filled">
         <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
           <div
             className="navbar-brand col-sm-3 col-md-3 mr-0"
@@ -131,6 +139,7 @@ class App extends Component {
             </li>
           </ul>
         </nav>
+        <></>
         <div className="container-fluid mt-1">
           <div className="row">
             <main role="main" className="col-lg-12 d-flex text-center">
@@ -138,7 +147,7 @@ class App extends Component {
                 className="content mr-auto ml-auto"
                 style={{ opacity: "0.8" }}
               >
-                <h1 style={{ color: "white" }}>
+                <h1 style={{ color: "black" }}>
                   kryptoBirdz - NFT Market Place
                 </h1>
 
@@ -152,8 +161,8 @@ class App extends Component {
                   <input
                     type="text"
                     name="nft-name"
-                    placeholder="NFT명을 입력해주세요"
-                    className=" mb-1"
+                    placeholder="NFT image location"
+                    className="form-control mb-1"
                     ref={(input) => {
                       this.kryptoBird = input;
                     }}
@@ -167,6 +176,37 @@ class App extends Component {
                 </form>
               </div>
             </main>
+          </div>
+          <hr></hr>
+          <div className="row textCenter">
+            {this.state.kryptoBirdz.map((kryptoBird, key) => {
+              return (
+                <div>
+                  <div>
+                    <MDBCard
+                      className="token img"
+                      style={{ maxWidth: "22rem" }}
+                    >
+                      <MDBCardImage
+                        src={kryptoBird}
+                        position="top"
+                        style={{ marginRight: "4px" }}
+                        heigth={"250rem"}
+                      />
+                      <MDBCardBody>
+                        <MDBCardTitle> KRYPTOBirdz </MDBCardTitle>
+                        <MDBCardText>
+                          The KryptoBirdz NFTs are from the META world! There is
+                          only one of each bird and each bird can be owned by a
+                          single person on the Ethereum blockchain.
+                        </MDBCardText>
+                        <MDBBtn href={kryptoBird}>Download</MDBBtn>
+                      </MDBCardBody>
+                    </MDBCard>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
